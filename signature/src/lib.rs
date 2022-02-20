@@ -1,7 +1,6 @@
 //! Types to represent signatures with various recovery identifiers.
 use serde::{Deserialize, Serialize};
-
-use crate::types::U256;
+use ethereum_types::U256;
 
 /// An ECDSA signature with a normalized recovery identifier.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Copy)]

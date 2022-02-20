@@ -13,7 +13,7 @@ use rand_core::{CryptoRng, RngCore};
 use std::fmt;
 use thiserror::Error;
 
-use crate::signature::Signature;
+use web3_signature::Signature;
 use crate::traits::Sign;
 use crate::types::{Address, U256};
 use web3_hash_utils::keccak256;
