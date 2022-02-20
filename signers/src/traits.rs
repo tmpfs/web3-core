@@ -2,8 +2,8 @@
 use async_trait::async_trait;
 use std::error::Error;
 
-use web3_signature::Signature;
 use crate::types::Address;
+use web3_signature::Signature;
 
 /// Trait for types that can sign messages.
 #[async_trait]
