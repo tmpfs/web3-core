@@ -2,7 +2,7 @@
 name = "web3-hash-utils"
 version = "1.0.0"
 edition = "2021"
-authors = ["Muji <muji@tmpfs.org>"]
+authors = ["Muji <muji@tmpfs.org>", "Georgios Konstantopoulos <me@gakonst.com>"]
 license = "Apache-2.0"
 description = "Utilities for hashing using keccak256"
 documentation = "https://docs.rs/web3-hash-utils"

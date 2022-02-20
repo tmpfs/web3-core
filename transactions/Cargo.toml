@@ -2,6 +2,13 @@
 name = "web3-transactions"
 version = "0.1.0"
 edition = "2021"
+authors = ["Muji <muji@tmpfs.org>", "Georgios Konstantopoulos <me@gakonst.com>"]
+license = "Apache-2.0"
+description = "Types for performing transactions"
+documentation = "https://docs.rs/web3-transactions"
+repository = "https://github.com/tmpfs/web3-core"
+readme = "README.md"
+keywords = ["ethereum", "web3", "transaction"]
 
 [dependencies]
 web3-hash-utils = "1"
