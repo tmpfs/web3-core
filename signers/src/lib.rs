@@ -6,7 +6,7 @@ pub mod single_party;
 mod traits;
 mod wallet;
 
-pub use ethereum_types as types;
+//pub use ethereum_types as types;
 
 pub use traits::Sign;
 pub use wallet::Wallet;

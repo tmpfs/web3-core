@@ -14,7 +14,7 @@ use std::fmt;
 use thiserror::Error;
 
 use crate::traits::Sign;
-use crate::types::{Address, U256};
+use ethereum_types::{Address, U256};
 use web3_hash_utils::keccak256;
 use web3_signature::Signature;
 

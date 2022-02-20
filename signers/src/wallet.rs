@@ -2,8 +2,8 @@
 //! using an underlying signer implementation.
 use thiserror::Error;
 
-use crate::types::U64;
-use crate::{traits::Sign, types::Address};
+use crate::traits::Sign;
+use ethereum_types::Address;
 use web3_hash_utils::hash_message;
 use web3_signature::Signature;
 

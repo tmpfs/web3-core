@@ -2,7 +2,7 @@
 use async_trait::async_trait;
 use std::error::Error;
 
-use crate::types::Address;
+use ethereum_types::Address;
 use web3_signature::Signature;
 
 /// Trait for types that can sign messages.
