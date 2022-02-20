@@ -1,0 +1,30 @@
+name: Library
+
+on: [pull_request]
+
+env:
+  RUST_LOG: "0"
+
+jobs:
+  build:
+    name: standard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: default
+          target: wasm32-unknown-unknown
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
+      - name: Run cargo clippy
+        run: cargo clippy --all
+      - name: Run cargo test
+        run: cargo test
+      - name: Run cargo doc
+        run: cargo doc --no-deps
+      - name: Run build
+        run: cargo build
+      - name: Run build for wasm32
+        run: cargo build --target wasm32-unknown-unknown

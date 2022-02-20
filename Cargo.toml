@@ -1,0 +1,15 @@
+[package]
+name = "web3-core"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[workspace]
+members = [
+  "hash-utils",
+  "keystore",
+  "signers",
+  "transactions"
+]

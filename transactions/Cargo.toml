@@ -1,0 +1,39 @@
+[package]
+name = "web3-transactions"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+web3-hash-utils = "1"
+
+ethereum-types = "0.13"
+sha3 = "0.9"
+serde = { version = "1", features = ["derive"] }
+bytes = { version = "1.1.0", features = ["serde"] }
+hex = { version = "0.4.3", default-features = false, features = ["std"] }
+rlp = { version = "0.5.0", default-features = false }
+rlp-derive = { version = "0.1.0", default-features = false }
+
+thiserror = "1"
+ecdsa = { version = "0.13.4", default-features = false, features = ["std"] }
+elliptic-curve = { version = "0.11.12", default-features = false }
+generic-array = { version = "0.14.5", default-features = false }
+k256 = { version = "0.10.2", default-features = false, features = ["keccak256", "ecdsa"] }
+
+# eip712 feature enabled dependencies
+convert_case = { version = "0.5.0", optional = true }
+syn = { version = "1.0.86", optional = true }
+quote = { version = "1.0.15", optional = true }
+proc-macro2 = { version = "1.0.36", optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.2", features = ["js"] }
+
+[dev-dependencies]
+serde_json = "1"
+bincode = { version = "1.3.3", default-features = false }
+
+[features]
+celo = ["legacy"] # celo support extends the transaction format with extra fields
+legacy = []
+eip712 = ["convert_case", "syn", "quote", "proc-macro2"]
