@@ -12,5 +12,5 @@ members = [
   "keystore",
   "signature",
   "signers",
-  "transactions"
+  "transaction"
 ]

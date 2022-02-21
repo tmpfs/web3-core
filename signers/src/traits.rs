@@ -9,7 +9,7 @@ use web3_signature::Signature;
 #[async_trait]
 pub trait Sign {
     /// The error type for the implementation.
-    type Error: Error + Send + Sync;
+    type Error: Error + Send + Sync + 'static;
 
     /// Signs a raw message.
     async fn sign<S: Send + Sync + AsRef<[u8]>>(

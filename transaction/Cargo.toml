@@ -1,5 +1,5 @@
 [package]
-name = "web3-transactions"
+name = "web3-transaction"
 version = "0.1.0"
 edition = "2021"
 authors = ["Muji <muji@tmpfs.org>", "Georgios Konstantopoulos <me@gakonst.com>"]
