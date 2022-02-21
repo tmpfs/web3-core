@@ -25,6 +25,9 @@ rand_core = "0.6"
 coins-bip39 = "0.6"
 coins-bip32 = "0.6"
 
+# NOTE: this includes an older version of rand!
+bip39 = { version = "1", features = ["rand"] }
+
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 getrandom = { version = "0.2", features = ["js"] }
 

@@ -50,8 +50,9 @@ where
     hash
 }
 
-/// Converts an Ethereum address to the checksum encoding
-/// Ref: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
+/// Converts an Ethereum address to the checksum encoding.
+///
+/// See [EIP-55](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md).
 pub fn to_checksum(addr: &Address, chain_id: Option<u8>) -> String {
     let prefixed_addr = match chain_id {
         Some(chain_id) => format!("{}0x{:x}", chain_id, addr),

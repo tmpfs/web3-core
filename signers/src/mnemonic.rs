@@ -1,5 +1,5 @@
 //! Create a deterministic private key using a mnemonic
-//! following BIP-39 specifications.
+//! following BIP-39 specifications for a single party wallet.
 use std::marker::PhantomData;
 use std::str::FromStr;
 
@@ -17,15 +17,12 @@ const DEFAULT_DERIVATION_PATH_PREFIX: &str = "m/44'/60'/0'/0/";
 /// Error produced by the mnemonic wallet builder.
 #[derive(Error, Debug)]
 pub enum MnemonicError {
-    /// Error suggests that a phrase was expected but not found
-    #[error("Expected phrase not found")]
+    /// Error thrown when a phrase was expected but not found.
+    #[error("expected phrase not found")]
     ExpectedPhraseNotFound,
-    /// Error suggests that a phrase was not expected but found
-    #[error("Unexpected phrase found")]
-    UnexpectedPhraseFound,
 }
 
-/// Represents a structure that can resolve into a `Wallet<SigningKey>`.
+/// Represents a structure that can resolve into a `Wallet<SingleParty>`.
 #[derive(Clone, Debug, PartialEq)]
 pub struct MnemonicBuilder<W: Wordlist> {
     /// The mnemonic phrase to use for the deterministic wallet.

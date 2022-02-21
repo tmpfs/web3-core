@@ -3,10 +3,16 @@
 #![deny(missing_docs)]
 
 mod mnemonic;
+mod phrase;
 pub mod single_party;
 mod traits;
 mod wallet;
 
+pub use bip39;
+pub use coins_bip32;
+pub use coins_bip39;
+
 pub use mnemonic::MnemonicBuilder;
+pub use phrase::{MnemonicPhrase, PhraseError, WordCount};
 pub use traits::Sign;
 pub use wallet::{Wallet, WalletError};
