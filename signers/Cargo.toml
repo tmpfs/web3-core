@@ -22,6 +22,8 @@ hex = "0.4"
 sha3 = "0.9"
 k256 = { version = "0.10", features = ["ecdsa", "keccak256"] }
 rand_core = "0.6"
+coins-bip39 = "0.6"
+coins-bip32 = "0.6"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 getrandom = { version = "0.2", features = ["js"] }

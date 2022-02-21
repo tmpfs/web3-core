@@ -1,5 +1,5 @@
 //! Utility functions for computing hashes.
-use ethereum_types::H256;
+use ethereum_types::{Address, H256};
 use sha2::Sha256;
 use sha3::{Digest, Keccak256};
 
@@ -48,4 +48,30 @@ where
         .try_into()
         .expect("hash is not the correct length");
     hash
+}
+
+/// Converts an Ethereum address to the checksum encoding
+/// Ref: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
+pub fn to_checksum(addr: &Address, chain_id: Option<u8>) -> String {
+    let prefixed_addr = match chain_id {
+        Some(chain_id) => format!("{}0x{:x}", chain_id, addr),
+        None => format!("{:x}", addr),
+    };
+    let hash = hex::encode(keccak256(&prefixed_addr));
+    let hash = hash.as_bytes();
+
+    let addr_hex = hex::encode(addr.as_bytes());
+    let addr_hex = addr_hex.as_bytes();
+
+    addr_hex.iter().zip(hash).fold(
+        "0x".to_owned(),
+        |mut encoded, (addr, hash)| {
+            encoded.push(if *hash >= 56 {
+                addr.to_ascii_uppercase() as char
+            } else {
+                addr.to_ascii_lowercase() as char
+            });
+            encoded
+        },
+    )
 }

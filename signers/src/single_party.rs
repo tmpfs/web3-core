@@ -39,6 +39,12 @@ pub struct SingleParty {
 }
 
 impl SingleParty {
+    /// Create a new single party signer using the given
+    /// signing key.
+    pub fn new(secret_key: SigningKey) -> Self {
+        Self { secret_key }
+    }
+
     /// Generate a random single party signer.
     pub fn random(rng: impl CryptoRng + RngCore) -> Self {
         Self {
