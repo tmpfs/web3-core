@@ -135,11 +135,13 @@ impl<W: Wordlist> MnemonicBuilder<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{MnemonicPhrase, WordCount};
+    use anyhow::Result;
     use coins_bip39::English;
     use web3_hash_utils::to_checksum;
 
-    #[tokio::test]
-    async fn mnemonic_deterministic() {
+    #[test]
+    fn mnemonic_deterministic() {
         // Testcases have been taken from MyCryptoWallet
         const TESTCASES: [(&str, u32, Option<&str>, &str); 4] = [
             (
@@ -187,5 +189,25 @@ mod tests {
                 };
                 assert_eq!(&to_checksum(wallet.address(), None), expected_addr);
             })
+    }
+
+    #[test]
+    fn mnemonic_recovery() -> Result<()> {
+        let phrase = MnemonicPhrase::words(Default::default())?;
+
+        // Generate a wallet
+        let first_wallet = MnemonicBuilder::<English>::default()
+            .phrase(&phrase)
+            .build()?;
+        let first_bytes = first_wallet.signer().to_bytes();
+
+        // Recover the wallet from the recovery seed phrase
+        let second_wallet = MnemonicBuilder::<English>::default()
+            .phrase(&phrase)
+            .build()?;
+        let second_bytes = second_wallet.signer().to_bytes();
+
+        assert_eq!(first_bytes, second_bytes);
+        Ok(())
     }
 }
