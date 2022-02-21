@@ -33,6 +33,10 @@ pub struct MnemonicBuilder<W: Wordlist> {
     derivation_path: DerivationPath,
     /// Password for the mnemonic phrase.
     password: Option<String>,
+    /// Optional chain id for the generated wallet.
+    ///
+    /// If no value is given the id for Ethereum mainnet is used (`1`).
+    chain_id: Option<u64>,
     /// PhantomData
     _wordlist: PhantomData<W>,
 }
@@ -47,6 +51,7 @@ impl<W: Wordlist> Default for MnemonicBuilder<W> {
             ))
             .expect("should parse the default derivation path"),
             password: None,
+            chain_id: None,
             _wordlist: PhantomData,
         }
     }
@@ -73,6 +78,13 @@ impl<W: Wordlist> MnemonicBuilder<W> {
     #[must_use]
     pub fn phrase<P: Into<String>>(mut self, phrase: P) -> Self {
         self.phrase = Some(phrase.into());
+        self
+    }
+
+    /// Set the chain id for the generated wallet.
+    #[must_use]
+    pub fn chain_id<C: Into<u64>>(mut self, id: C) -> Self {
+        self.chain_id = Some(id.into());
         self
     }
 
@@ -114,21 +126,14 @@ impl<W: Wordlist> MnemonicBuilder<W> {
             Some(phrase) => Mnemonic::<W>::new_from_phrase(phrase)?,
             None => return Err(MnemonicError::ExpectedPhraseNotFound.into()),
         };
-        self.mnemonic_to_wallet(&mnemonic)
-    }
 
-    fn mnemonic_to_wallet(
-        &self,
-        mnemonic: &Mnemonic<W>,
-    ) -> Result<Wallet<SingleParty>, WalletError> {
         let derived_priv_key = mnemonic
             .derive_key(&self.derivation_path, self.password.as_deref())?;
-
         let key: &coins_bip32::prelude::SigningKey = derived_priv_key.as_ref();
         let secret_key = SigningKey::from_bytes(&key.to_bytes())?;
         let signer = SingleParty::new(secret_key);
         let address = signer.address();
-        Ok(Wallet::new(signer, address, 1))
+        Ok(Wallet::new(signer, address, self.chain_id.unwrap_or(1)))
     }
 }
 
