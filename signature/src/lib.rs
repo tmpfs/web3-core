@@ -2,6 +2,19 @@
 #![deny(missing_docs)]
 use ethereum_types::U256;
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
+use thiserror::Error;
+
+/// Errors thrown converting to and from signatures.
+#[derive(Debug, Error)]
+pub enum SignatureError {
+    /// Invalid length, secp256k1 signatures are 65 bytes
+    #[error("invalid signature length, got {0}, expected 65")]
+    InvalidLength(usize),
+    /// When parsing a signature from string to hex
+    #[error(transparent)]
+    DecodingError(#[from] hex::FromHexError),
+}
 
 /// An ECDSA signature with a recovery identifier.
 ///
@@ -123,6 +136,35 @@ impl Signature {
         left.copy_from_slice(&r);
         right.copy_from_slice(&s);
         out
+    }
+}
+
+impl<'a> TryFrom<&'a [u8]> for Signature {
+    type Error = SignatureError;
+
+    /// Parses a raw signature which is expected to be 65 bytes long where
+    /// the first 32 bytes is the `r` value, the second 32 bytes the `s` value
+    /// and the final byte is the `v` value in 'Electrum' notation.
+    fn try_from(bytes: &'a [u8]) -> Result<Self, Self::Error> {
+        if bytes.len() != 65 {
+            return Err(SignatureError::InvalidLength(bytes.len()));
+        }
+
+        let v = bytes[64];
+        let r = U256::from_big_endian(&bytes[0..32]);
+        let s = U256::from_big_endian(&bytes[32..64]);
+
+        Ok(Signature { r, s, v: v.into() })
+    }
+}
+
+impl FromStr for Signature {
+    type Err = SignatureError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.strip_prefix("0x").unwrap_or(s);
+        let bytes = hex::decode(s)?;
+        Signature::try_from(&bytes[..])
     }
 }
 

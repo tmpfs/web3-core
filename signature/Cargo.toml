@@ -12,3 +12,5 @@ keywords = ["ethereum", "web3", "wallet", "sign", "ECDSA"]
 [dependencies]
 ethereum-types = "0.13"
 serde = { version = "1", features = ["derive"] }
+thiserror = "1"
+hex = "0.4"

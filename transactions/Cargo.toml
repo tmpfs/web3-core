@@ -12,6 +12,7 @@ keywords = ["ethereum", "web3", "transaction"]
 
 [dependencies]
 web3-hash-utils = "1"
+web3-signature = { version = "0.1", path = "../signature" }
 
 ethereum-types = "0.13"
 sha3 = "0.9"
