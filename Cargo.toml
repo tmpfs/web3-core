@@ -14,3 +14,10 @@ members = [
   "signers",
   "transaction"
 ]
+
+[dependencies]
+web3-hash-utils = { path = "./hash-utils" }
+web3-keystore = { path = "./keystore" }
+web3-signature = { path = "./signature" }
+web3-signers = { path = "./signers" }
+web3-transaction = { path = "./transaction" }
