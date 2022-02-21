@@ -1,7 +1,8 @@
 use super::{eip2930::AccessList, normalize_v, rlp_opt};
-use crate::types::{Address, Bytes, NameOrAddress, Signature, H256, U256, U64};
+use crate::types::{Address, Bytes, NameOrAddress, H256, U256, U64};
 use rlp::{Decodable, DecoderError, RlpStream};
 use web3_hash_utils::keccak256;
+use web3_signature::Signature;
 
 /// EIP-1559 transactions have 9 fields
 const NUM_TX_FIELDS: usize = 9;

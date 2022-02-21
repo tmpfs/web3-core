@@ -1,11 +1,12 @@
 use super::{normalize_v, request::TransactionRequest};
-use crate::types::{Address, Bytes, Signature, H256, U256, U64};
+use crate::types::{Address, Bytes, H256, U256, U64};
 
 use rlp::{Decodable, DecoderError, RlpStream};
 use rlp_derive::{
     RlpDecodable, RlpDecodableWrapper, RlpEncodable, RlpEncodableWrapper,
 };
 use serde::{Deserialize, Serialize};
+use web3_signature::Signature;
 
 const NUM_EIP2930_FIELDS: usize = 8;
 

@@ -21,10 +21,10 @@ jobs:
       - name: Run cargo clippy
         run: cargo clippy --all
       - name: Run cargo test
-        run: cargo test
+        run: cargo test --all
       - name: Run cargo doc
-        run: cargo doc --no-deps
+        run: cargo doc --all --no-deps
       - name: Run build
-        run: cargo build
+        run: cargo build --all
       - name: Run build for wasm32
-        run: cargo build --target wasm32-unknown-unknown
+        run: cargo build --all --target wasm32-unknown-unknown

@@ -1,5 +1,6 @@
 //! Utility functions for computing hashes.
 use ethereum_types::H256;
+use sha2::Sha256;
 use sha3::{Digest, Keccak256};
 
 const PREFIX: &str = "\x19Ethereum Signed Message:\n";
@@ -27,6 +28,21 @@ where
     S: AsRef<[u8]>,
 {
     let hash = Keccak256::digest(bytes.as_ref());
+    let hash: [u8; 32] = hash
+        .as_slice()
+        .try_into()
+        .expect("hash is not the correct length");
+    hash
+}
+
+/// Compute the SHA-256 hash of input bytes.
+///
+/// Panics if the computed hash is not the expected length (32 bytes).
+pub fn sha256<S>(bytes: S) -> [u8; 32]
+where
+    S: AsRef<[u8]>,
+{
+    let hash = Sha256::digest(bytes.as_ref());
     let hash: [u8; 32] = hash
         .as_slice()
         .try_into()

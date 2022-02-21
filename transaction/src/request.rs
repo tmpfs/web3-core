@@ -1,11 +1,12 @@
 //! Transaction types
 use super::{extract_chain_id, rlp_opt, NUM_TX_FIELDS};
-use crate::types::{Address, Bytes, NameOrAddress, Signature, H256, U256, U64};
+use crate::types::{Address, Bytes, NameOrAddress, H256, U256, U64};
 
 use rlp::{Decodable, RlpStream};
 use serde::{Deserialize, Serialize};
 
 use web3_hash_utils::keccak256;
+use web3_signature::Signature;
 
 /// Parameters for sending a transaction
 #[derive(Clone, Default, Serialize, Deserialize, PartialEq, Eq, Debug)]
@@ -322,8 +323,8 @@ impl TransactionRequest {
 #[cfg(test)]
 #[cfg(not(feature = "celo"))]
 mod tests {
-    use crate::types::Signature;
     use rlp::{Decodable, Rlp};
+    use web3_signature::Signature;
 
     use super::{Address, TransactionRequest, U256, U64};
 

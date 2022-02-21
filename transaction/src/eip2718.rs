@@ -2,7 +2,8 @@ use super::{
     eip1559::Eip1559TransactionRequest,
     eip2930::{AccessList, Eip2930TransactionRequest},
 };
-use crate::types::{Address, Bytes, NameOrAddress, Signature, H256, U256, U64};
+use crate::types::{Address, Bytes, NameOrAddress, H256, U256, U64};
+use web3_signature::Signature;
 
 use crate::request::TransactionRequest;
 use serde::{Deserialize, Serialize};

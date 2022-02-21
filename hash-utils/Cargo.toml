@@ -2,8 +2,8 @@
 name = "web3-hash-utils"
 version = "1.0.0"
 edition = "2021"
-authors = ["Muji <muji@tmpfs.org>"]
-license = "Apache-2.0"
+authors = ["Muji <muji@tmpfs.org>", "Georgios Konstantopoulos <me@gakonst.com>"]
+license = "MIT OR Apache-2.0"
 description = "Utilities for hashing using keccak256"
 documentation = "https://docs.rs/web3-hash-utils"
 repository = "https://github.com/tmpfs/web3-hash-utils"
@@ -13,6 +13,7 @@ keywords = ["ethereum", "web3", "hash", "keccak"]
 [dependencies]
 ethereum-types = "0.13"
 sha3 = "0.10"
+sha2 = "0.10"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 getrandom = { version = "0.2", features = ["js"] }

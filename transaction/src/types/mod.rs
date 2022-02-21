@@ -8,13 +8,11 @@ use std::fmt::{Display, Formatter, LowerHex, Result as FmtResult};
 mod block;
 mod ens;
 mod log;
-mod signature;
 
 pub use block::*;
 pub use ens::*;
 pub use ethereum_types::{Address, Bloom, H256, U256, U64};
 pub use log::*;
-pub use signature::*;
 
 pub use H256 as TxHash;
 

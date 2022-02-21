@@ -1,0 +1,16 @@
+[package]
+name = "web3-signature"
+version = "0.1.0"
+edition = "2021"
+authors = ["Muji <muji@tmpfs.org>"]
+license = "MIT OR Apache-2.0"
+description = "Types to represent ECDSA signatures"
+documentation = "https://docs.rs/web3-signature"
+repository = "https://github.com/tmpfs/web3-core"
+keywords = ["ethereum", "web3", "wallet", "sign", "ECDSA"]
+
+[dependencies]
+ethereum-types = "0.13"
+serde = { version = "1", features = ["derive"] }
+thiserror = "1"
+hex = "0.4"

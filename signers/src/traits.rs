@@ -2,14 +2,14 @@
 use async_trait::async_trait;
 use std::error::Error;
 
-use crate::signature::Signature;
-use crate::types::Address;
+use ethereum_types::Address;
+use web3_signature::Signature;
 
 /// Trait for types that can sign messages.
 #[async_trait]
 pub trait Sign {
     /// The error type for the implementation.
-    type Error: Error + Send + Sync;
+    type Error: Error + Send + Sync + 'static;
 
     /// Signs a raw message.
     async fn sign<S: Send + Sync + AsRef<[u8]>>(

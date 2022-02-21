@@ -10,7 +10,9 @@ pub mod eip712;
 
 pub mod types;
 
-use types::Signature;
+pub use eip2718::TypedTransaction;
+
+use web3_signature::Signature;
 
 pub(crate) const BASE_NUM_TX_FIELDS: usize = 9;
 
