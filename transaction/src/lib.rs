@@ -11,6 +11,8 @@ pub mod eip712;
 pub mod types;
 
 pub use eip2718::TypedTransaction;
+pub use request::TransactionRequest;
+pub use response::Transaction;
 
 use web3_signature::Signature;
 

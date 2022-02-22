@@ -7,7 +7,7 @@ use web3_signature::Signature;
 
 /// Trait for types that can sign messages.
 #[async_trait]
-pub trait Sign {
+pub trait Sign: std::fmt::Display {
     /// The error type for the implementation.
     type Error: Error + Send + Sync + 'static;
 
