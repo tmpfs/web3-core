@@ -1,0 +1,15 @@
+{
+  "name": "web3-core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Library for web3 wallets",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tmpfs/web3-core.git"
+  },
+  "author": "Muji <muji@tmpfs.org>",
+  "license": "MIT",
+  "devDependencies": {
+    "ganache": "^7.0.2"
+  }
+}

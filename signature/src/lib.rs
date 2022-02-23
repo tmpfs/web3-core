@@ -139,6 +139,24 @@ impl Signature {
     }
 }
 
+/*
+impl From<&Signature> for [u8; 65] {
+    fn from(src: &Signature) -> [u8; 65] {
+        let mut sig = [0u8; 65];
+        let mut r_bytes = [0u8; 32];
+        let mut s_bytes = [0u8; 32];
+        src.r.to_big_endian(&mut r_bytes);
+        src.s.to_big_endian(&mut s_bytes);
+        sig[..32].copy_from_slice(&r_bytes);
+        sig[32..64].copy_from_slice(&s_bytes);
+        // TODO: What if we try to serialize a signature where
+        // the `v` is not normalized?
+        sig[64] = src.v as u8;
+        sig
+    }
+}
+*/
+
 impl<'a> TryFrom<&'a [u8]> for Signature {
     type Error = SignatureError;
 

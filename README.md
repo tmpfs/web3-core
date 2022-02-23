@@ -6,6 +6,20 @@ Design goals are first-class support for Webassembly and support for MPC using [
 
 Derived from work on [ethers][], [web3][] and [eth-keystore][].
 
+## Tests
+
+To run the tests first start `ganache` using a specific mnemonic:
+
+```
+make test-server
+```
+
+Then you can run the test suite:
+
+```
+cargo test --all
+```
+
 [ethers]: https://github.com/gakonst/ethers-rs
 [web3]: https://github.com/tomusdrw/rust-web3
 [eth-keystore]: https://github.com/roynalnaruto/eth-keystore-rs
