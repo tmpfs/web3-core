@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use k256::{
     ecdsa::{
         recoverable,
-        signature::{Signer, Verifier},
+        signature::{Signer, Verifier, DigestSigner},
         SigningKey, VerifyingKey,
     },
     elliptic_curve::sec1::ToEncodedPoint,
@@ -13,7 +13,7 @@ use rand_core::{CryptoRng, RngCore};
 use std::fmt;
 use thiserror::Error;
 
-use crate::traits::Sign;
+use crate::{traits::Sign, hash::Sha256Proxy};
 use ethereum_types::{Address, U256};
 use web3_hash_utils::keccak256;
 use web3_signature::Signature;
@@ -63,6 +63,26 @@ impl Sign for SingleParty {
     ) -> Result<Signature, Self::Error> {
         let sig: recoverable::Signature =
             self.secret_key.sign(message.as_ref());
+
+        let r_bytes: FieldBytes = sig.r().into();
+        let s_bytes: FieldBytes = sig.s().into();
+        let v: u8 = sig.recovery_id().into();
+        let signature = Signature {
+            r: U256::from_big_endian(r_bytes.as_slice()),
+            s: U256::from_big_endian(s_bytes.as_slice()),
+            v: v as u64,
+        };
+
+        Ok(signature)
+    }
+
+    /// Signs a prehashed message.
+    async fn sign_digest(
+        &self,
+        digest: Sha256Proxy,
+    ) -> Result<Signature, Self::Error> {
+        let sig: recoverable::Signature =
+            self.secret_key.sign_digest(digest);
 
         let r_bytes: FieldBytes = sig.r().into();
         let s_bytes: FieldBytes = sig.s().into();

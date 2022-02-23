@@ -7,7 +7,7 @@ use std::convert::TryFrom;
 use web3_signers::{single_party::SingleParty, Sign, Wallet, MnemonicBuilder, coins_bip39::English};
 
 use web3_hash_utils::to_checksum;
-use web3_transaction::{TransactionRequest, eip1559::Eip1559TransactionRequest, TypedTransaction};
+use web3_transaction::{TransactionRequest, eip1559::Eip1559TransactionRequest, TypedTransaction, types::BlockNumber};
 use web3_transaction::types::{U256, Address};
 
 fn checksum(input: &Address) -> Address {
@@ -44,10 +44,14 @@ fn signer(index: usize) -> Result<Wallet<SingleParty>> {
     let (address, private_key) = signers.get(index)
         .ok_or_else(|| anyhow!("signer index is out of bounds"))?;
 
+    //println!("Ganache private key: {}", &private_key[2..]);
+
     let private_key_bytes = hex::decode(&private_key[2..])?;
     let signer = SingleParty::from_bytes(&private_key_bytes)?;
     let signer_address = format!("{}", signer);
     let address = signer.address().clone();
+
+    //println!("Signer private key: {}", hex::encode(signer.to_bytes()));
 
     //println!("{}", address);
     //println!("{}", checksum(&signer.address()));
@@ -66,61 +70,79 @@ fn provider() -> Result<Provider::<Http>> {
 
 #[tokio::test]
 async fn tx_sign_legacy() -> Result<()> {
-    let (from, to) = (signer(0)?, signer(1)?);
+    //let to = signer(0)?;
 
     let provider = provider()?;
     let accounts = provider.get_accounts().await?;
-    let signer1 = accounts[0];
-    let signer2 = accounts[1];
+    let to = accounts[1];
 
+    let to_bytes: [u8; 20] = to.into();
+    let to = Address::from_slice(&to_bytes);
 
-    let first_wallet = MnemonicBuilder::<English>::default()
+    let from = MnemonicBuilder::<English>::default()
         .phrase("comfort expect symptom success relax hockey position catalog grab fall resist guitar")
-        .build()?;
+        .build()?
+        .with_chain_id(1337u64);
 
-    //signer1.foo();
+    println!("From private key: {}", hex::encode(from.signer().to_bytes()));
 
-    //println!("Accounts: {:#?}", accounts)
-    //
+    let addr = ethers_core::types::NameOrAddress::Address(
+        ethers_core::types::Address::from_slice(from.address().as_ref()));
 
-    //let addr = ethers_core::types::NameOrAddress::Address(
-        //ethers_core::types::Address::from_slice(from.address().as_ref()));
-
-    //let balance_before = provider.get_balance(
-        //addr, None).await?;
+    let balance_before = provider.get_balance(
+        addr.clone(), None).await?;
 
     //println!("Balance before {:#?}", signer1);
     //println!("Balance before {}", from);
     //println!("Balance before {:#?}", balance_before);
 
     //let from_addr = Address::from_slice(&hex::decode("dAa69C45671f3012e20Ac3240fefE55C20c9f5Ca")?);
+    //
+    let nonce1 = provider.get_transaction_count(
+        addr.clone(), Some(ethers_core::types::BlockNumber::Latest.into())).await?;
 
-    let value = 1_000_000u64;
+    let nonce_bytes: [u8; 32] = nonce1.into();
+    let nonce1 = U256::from_big_endian(&nonce_bytes);
+
+    let value = 1_000u64;
     let data: Vec<u8> = vec![];
-    let tx = TransactionRequest::new()
-        .from(first_wallet.address().clone())
-        .to(to.address().clone())
-        .value(U256::from(value))
+    let tx: TypedTransaction = TransactionRequest::new()
+        .from(from.address().clone())
+        .to(to)
+        .value(1000)
         .gas(21_000u64)
-        .gas_price(22_000u64)
+        .gas_price(22_000_000_000u64)
         //.max_fee_per_gas(300_000u64)
         //.max_priority_fee_per_gas(50_000u64)
-        //.nonce(3)
+        //.nonce(nonce1)
         //.data(data);
-        //.chain_id(1337)
+        .chain_id(1337u64)
+        .nonce(nonce1)
+        .into()
         ;
 
-    println!("Tx sign test {:#?}", tx);
+    println!("Tx {:#?}", tx);
 
     //let signature = from.sign_transaction(
         //&TypedTransaction::Eip1559(tx.clone())).await?;
 
-    let signature = from.sign_transaction(
-        &TypedTransaction::Legacy(tx.clone())).await?;
+    let signature = from.sign_transaction(&tx).await?;
+    println!("Signature {:#?}", signature);
+
+    let signature = from.sign_transaction(&tx).await?;
+    println!("Signature {:#?}", signature);
+
     //let signature = signature.normalize_eip155(1337).into_electrum();
     //println!("Got signature {:#?}", signature);
 
     let bytes = tx.rlp_signed(&signature);
+
+    println!("Bytes {}", hex::encode(&bytes.0));
+
+    // Bytes f8680985051f4d5c0082520894e2af91e419974999c22b1de7eaada5bf02c4e09f8203e880820a96a0cd0ebacd88f982e8062b735f9586802a7be2a5adc10beca2e97989ac6fee1b5ca030275fe46ed9b8b38a3cd618d5aa6e2be8793c3e7d0bcb4af694e3729da67f7e
+    //
+    // Bytes f8680a85051f4d5c0082520894140e8445989105f22803172f82140e9a92b5918b8203e880820a96a059f5970909140fd913cc859401bc8eac218f67ca11d63a4f2686a7439e6a835ba0617a84cff0c1241b0f1bde8123ef7582fa0760d15a8afd376109fa228e02421b
+
     //let bytes = tx.rlp();
     //let raw_hex = hex::encode(&bytes);
 
@@ -129,7 +151,11 @@ async fn tx_sign_legacy() -> Result<()> {
     //let sig_1 = provider.sign(Bytes(bytes.0.clone()), &signer1).await?;
     //println!("Sig 1 {:#?}", sig_1);
 
-    let tx_receipt = provider.send_raw_transaction(Bytes(bytes.0)).await?;
+    //let tx_receipt = provider.send_raw_transaction(Bytes(bytes.0)).await?;
+
+    let tx_receipt = provider
+        .send_raw_transaction(Bytes(bytes.0))
+        .await?;
 
     println!("Pending transaction: {:#?}", tx_receipt);
 
