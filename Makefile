@@ -1,5 +1,5 @@
 test-server:
-	@ganache -m "comfort expect symptom success relax hockey position catalog grab fall resist guitar"
+	@npx ganache -m "comfort expect symptom success relax hockey position catalog grab fall resist guitar"
 
 fmt:
 	@cargo fmt --all

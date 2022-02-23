@@ -9,8 +9,8 @@ use web3_signers::{coins_bip39::English, MnemonicBuilder};
 use web3_transaction::types::{Address, U256};
 use web3_transaction::{TransactionRequest, TypedTransaction};
 
-fn provider() -> Result<Provider<Http>> {
-    let provider = Provider::<Http>::try_from("http://localhost:8545")?;
+fn provider(url: &str) -> Result<Provider<Http>> {
+    let provider = Provider::<Http>::try_from(url)?;
     Ok(provider)
 }
 
@@ -36,7 +36,7 @@ const MNEMONIC_PHRASE: &str = include_str!("mnemonic.txt");
 
 #[tokio::test]
 async fn tx_sign_legacy() -> Result<()> {
-    let provider = provider()?;
+    let provider = provider("http://localhost:8545")?;
     let accounts = provider.get_accounts().await?;
     let to = into_address(accounts[1]);
 
