@@ -1,6 +1,5 @@
 //! Utility functions for computing hashes.
 use ethereum_types::{Address, H256};
-use sha2::Sha256;
 use sha3::{Digest, Keccak256};
 
 const PREFIX: &str = "\x19Ethereum Signed Message:\n";
@@ -35,25 +34,10 @@ where
     hash
 }
 
-/// Compute the SHA-256 hash of input bytes.
-///
-/// Panics if the computed hash is not the expected length (32 bytes).
-pub fn sha256<S>(bytes: S) -> [u8; 32]
-where
-    S: AsRef<[u8]>,
-{
-    let hash = Sha256::digest(bytes.as_ref());
-    let hash: [u8; 32] = hash
-        .as_slice()
-        .try_into()
-        .expect("hash is not the correct length");
-    hash
-}
-
 /// Converts an Ethereum address to the checksum encoding.
 ///
 /// See [EIP-55](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md).
-pub fn to_checksum(addr: &Address, chain_id: Option<u8>) -> String {
+pub fn to_checksum(addr: &Address, chain_id: Option<u64>) -> String {
     let prefixed_addr = match chain_id {
         Some(chain_id) => format!("{}0x{:x}", chain_id, addr),
         None => format!("{:x}", addr),

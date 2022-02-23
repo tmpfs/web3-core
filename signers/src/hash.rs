@@ -1,10 +1,11 @@
 //! This is a helper module used to pass the pre-hashed message for signing to the
 //! `sign_digest` methods of K256.
 use elliptic_curve::consts::U64;
-use k256::ecdsa::signature::digest::{
-    generic_array::GenericArray, BlockInput, Digest, FixedOutput, Output, Reset, Update,
-};
 use ethereum_types::H256;
+use k256::ecdsa::signature::digest::{
+    generic_array::GenericArray, BlockInput, Digest, FixedOutput, Output,
+    Reset, Update,
+};
 
 pub type Sha256Proxy = ProxyDigest<sha2::Sha256>;
 
@@ -80,7 +81,10 @@ impl<D: Digest> FixedOutput for ProxyDigest<D> {
         }
     }
 
-    fn finalize_into_reset(&mut self, out: &mut GenericArray<u8, Self::OutputSize>) {
+    fn finalize_into_reset(
+        &mut self,
+        out: &mut GenericArray<u8, Self::OutputSize>,
+    ) {
         let s = std::mem::take(self);
         s.finalize_into(out);
     }

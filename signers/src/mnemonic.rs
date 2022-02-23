@@ -140,7 +140,7 @@ impl<W: Wordlist> MnemonicBuilder<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{MnemonicPhrase, WordCount};
+    use crate::MnemonicPhrase;
     use anyhow::Result;
     use coins_bip39::English;
     use web3_hash_utils::to_checksum;
