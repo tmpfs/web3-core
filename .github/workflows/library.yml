@@ -26,7 +26,9 @@ jobs:
       - name: Run cargo clippy
         run: cargo clippy --all
       - name: Run test ganache instance
-        run: make test-server
+        run: make test-server &
+      - name: Wait a while for test server
+        run: sleep 2
       - name: Run cargo test
         run: cargo test --all
       - name: Run cargo doc
