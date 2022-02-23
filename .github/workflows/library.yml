@@ -24,7 +24,7 @@ jobs:
       - name: Run cargo fmt
         run: cargo fmt --all -- --check
       - name: Run cargo clippy
-        run: cargo clippy --all
+        run: cargo clippy --all --no-deps
       - name: Run test ganache instance
         run: make test-server &
       - name: Wait a while for test server

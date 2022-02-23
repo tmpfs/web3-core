@@ -84,12 +84,12 @@ impl Default for WordCount {
     }
 }
 
-impl Into<u16> for WordCount {
-    fn into(self) -> u16 {
-        match self {
-            Self::Short(value) => value,
-            Self::Medium(value) => value,
-            Self::Long(value) => value,
+impl From<WordCount> for u16 {
+    fn from(value: WordCount) -> u16 {
+        match value {
+            WordCount::Short(value)
+            | WordCount::Medium(value)
+            | WordCount::Long(value) => value,
         }
     }
 }
