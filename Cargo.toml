@@ -9,6 +9,7 @@ crate-type = ["cdylib"]
 [workspace]
 members = [
   "hash-utils",
+  "helpers",
   "keystore",
   "signature",
   "signers",
