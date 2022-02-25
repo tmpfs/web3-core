@@ -11,7 +11,7 @@ use helpers::*;
 const MNEMONIC_PHRASE: &str = include_str!("mnemonic.txt");
 
 #[tokio::test]
-async fn tx_sign_legacy() -> Result<()> {
+async fn tx_single_party_legacy() -> Result<()> {
     let provider = provider("http://localhost:8545")?;
     let accounts = provider.get_accounts().await?;
     let to = into_address(accounts[1]);
