@@ -85,8 +85,6 @@ impl<S: Sign> Wallet<S> {
                 let mut tx_with_chain = tx.clone();
                 tx_with_chain.set_chain_id(self.chain_id);
                 Ok(self.sign_hash(tx_with_chain.sighash(), true).await?)
-
-                //Ok(self.sign_hash(tx.sighash(), false).await?)
             }
         }
     }

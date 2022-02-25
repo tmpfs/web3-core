@@ -2,18 +2,23 @@ use anyhow::Result;
 
 use ethers_providers::Middleware;
 
+use web3_signature::Signature;
 use web3_signers::{coins_bip39::English, MnemonicBuilder};
-use web3_transaction::{TransactionRequest, TypedTransaction, types::Address};
+use web3_transaction::{
+    types::{Address, U256},
+    TransactionRequest, TypedTransaction,
+};
 
 mod helpers;
 use helpers::*;
 
 const MNEMONIC_PHRASE: &str = include_str!("mnemonic.txt");
 const PARTIES: u16 = 3;
+const ENDPOINT: &str = "http://localhost:8545";
 
 #[tokio::test]
 async fn tx_multi_party_legacy() -> Result<()> {
-    let provider = provider("http://localhost:8545")?;
+    let provider = provider(ENDPOINT)?;
     let accounts = provider.get_accounts().await?;
     let to = into_address(accounts[1]);
 
@@ -28,10 +33,16 @@ async fn tx_multi_party_legacy() -> Result<()> {
     let pk1_bytes = pk1.to_bytes(false).to_vec();
     let mpc_addr = mpc_address(pk1_bytes);
 
+    let balance_before = provider
+        .get_balance(into_provider_address(&to), None)
+        .await?;
+
+    let balance_before_mpc = provider
+        .get_balance(into_provider_address(&mpc_addr), None)
+        .await?;
+
     // Ensure the MPC address has some funds to spend
     fund_mpc_account(mpc_addr).await?;
-
-    let balance_before = provider.get_balance(into_provider_address(&to), None).await?;
 
     let nonce = into_u256(
         provider
@@ -55,7 +66,29 @@ async fn tx_multi_party_legacy() -> Result<()> {
 
     dbg!(&tx);
 
-    //let balance_before = provider.get_balance(into_provider_address(&mpc_addr), None).await?;
+    let sighash = tx.sighash();
+
+    let mut signatures = mpc_signature(&sighash, ks1, ks2)?;
+    let signature = signatures.remove(0);
+
+    let r = signature.r.to_bytes().as_ref().to_vec();
+    let s = signature.s.to_bytes().as_ref().to_vec();
+    let v = signature.recid as u64;
+
+    let signature = Signature {
+        r: U256::from_big_endian(&r),
+        s: U256::from_big_endian(&s),
+        v,
+    }
+    .into_eip155(1337);
+
+    println!("Got MPC signature {:#?}", signature);
+
+    let bytes = tx.rlp_signed(&signature);
+    let tx_receipt = provider.send_raw_transaction(into_bytes(bytes)).await?;
+    dbg!(tx_receipt);
+
+    //let balance_after = provider.get_balance(into_provider_address(&mpc_addr), None).await?;
 
     //println!("Got address {:#?}", mpc_addr);
     //println!("Got balance {:#?}", balance_before);
@@ -66,7 +99,7 @@ async fn tx_multi_party_legacy() -> Result<()> {
 }
 
 async fn fund_mpc_account(mpc_addr: Address) -> Result<()> {
-    let provider = provider("http://localhost:8545")?;
+    let provider = provider(ENDPOINT)?;
 
     // Now we need to ensure the MPC address has some funds
     let from = MnemonicBuilder::<English>::default()
@@ -95,18 +128,8 @@ async fn fund_mpc_account(mpc_addr: Address) -> Result<()> {
         .nonce(nonce)
         .into();
 
-    //dbg!(&tx);
-
     let signature = from.sign_transaction(&tx).await?;
-    //dbg!(&signature);
-
     let bytes = tx.rlp_signed(&signature);
-    //dbg!(hex::encode(&bytes.0));
-
     let tx_receipt = provider.send_raw_transaction(into_bytes(bytes)).await?;
-    //dbg!(tx_receipt);
-
-    //let mpc_balance= provider.get_balance(into_provider_address(&mpc_addr), None).await?;
-
     Ok(())
 }

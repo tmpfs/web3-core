@@ -2,6 +2,7 @@
 //! to use the ethers JSON RPC provider.
 use anyhow::Result;
 use std::path::{Path, PathBuf};
+use url::Url;
 
 use ethers_providers::{Http, Provider};
 use std::convert::TryFrom;
@@ -13,7 +14,7 @@ use curv::{
     arithmetic::Converter, elliptic::curves::secp256_k1::Secp256k1, BigInt,
 };
 use multi_party_ecdsa::protocols::multi_party_ecdsa::gg_2020::{
-    party_i::verify,
+    party_i::{verify, SignatureRecid},
     state_machine::{
         keygen::LocalKey,
         sign::{OfflineStage, SignManual},
@@ -21,8 +22,13 @@ use multi_party_ecdsa::protocols::multi_party_ecdsa::gg_2020::{
 };
 use round_based::StateMachine;
 
-pub fn provider(url: &str) -> Result<Provider<Http>> {
-    let provider = Provider::<Http>::try_from(url)?;
+pub fn provider(src: &str) -> Result<Provider<Http>> {
+    let client = reqwest::Client::builder()
+        .pool_max_idle_per_host(0)
+        .build()?;
+    let url = Url::parse(src)?;
+    let http = Http::new_with_client(url, client);
+    let provider = Provider::<Http>::new(http);
     Ok(provider)
 }
 
@@ -76,16 +82,16 @@ pub fn mpc_address(bytes: Vec<u8>) -> Address {
 
 pub fn mpc_signature<B>(
     message: B,
-    ks1: LocalKey<Secp256k1>,
-    ks2: LocalKey<Secp256k1>,
-) -> Result<()>
+    ks1: &LocalKey<Secp256k1>,
+    ks2: &LocalKey<Secp256k1>,
+) -> Result<Vec<SignatureRecid>>
 where
     B: AsRef<[u8]>,
 {
     // Start signing offline stage, assuming sl_i is key shares
     // with indices 1 and 2
-    let mut s1 = OfflineStage::new(1, vec![1, 2], ks1)?;
-    let mut s2 = OfflineStage::new(2, vec![1, 2], ks2)?;
+    let mut s1 = OfflineStage::new(1, vec![1, 2], ks1.clone())?;
+    let mut s2 = OfflineStage::new(2, vec![1, 2], ks2.clone())?;
 
     debug_assert!(s1.wants_to_proceed());
     debug_assert!(s2.wants_to_proceed());
@@ -286,5 +292,5 @@ where
     debug_assert!(verify(&signature1, &s1_pk, &data).is_ok());
     debug_assert!(verify(&signature2, &s2_pk, &data).is_ok());
 
-    Ok(())
+    Ok(vec![signature1, signature2])
 }
