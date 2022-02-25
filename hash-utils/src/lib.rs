@@ -4,6 +4,20 @@ use sha3::{Digest, Keccak256};
 
 const PREFIX: &str = "\x19Ethereum Signed Message:\n";
 
+/// Prefix a message according to EIP-191.
+///
+/// The data is a UTF-8 encoded string and will enveloped as follows:
+/// `"\x19Ethereum Signed Message:\n" + message.length + message`.
+pub fn prefix_message<S>(message: S) -> Vec<u8>
+where
+    S: AsRef<[u8]>,
+{
+    let message = message.as_ref();
+    let mut eth_message = format!("{}{}", PREFIX, message.len()).into_bytes();
+    eth_message.extend_from_slice(message);
+    eth_message
+}
+
 /// Hash a message according to EIP-191.
 ///
 /// The data is a UTF-8 encoded string and will enveloped as follows:
@@ -13,10 +27,7 @@ pub fn hash_message<S>(message: S) -> H256
 where
     S: AsRef<[u8]>,
 {
-    let message = message.as_ref();
-    let mut eth_message = format!("{}{}", PREFIX, message.len()).into_bytes();
-    eth_message.extend_from_slice(message);
-    keccak256(&eth_message).into()
+    keccak256(&prefix_message(message)).into()
 }
 
 /// Compute the Keccak-256 hash of input bytes.

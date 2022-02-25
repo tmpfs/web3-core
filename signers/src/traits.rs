@@ -5,7 +5,7 @@ use std::error::Error;
 use ethereum_types::Address;
 use web3_signature::Signature;
 
-use crate::hash::Sha256Proxy;
+//use crate::hash::Sha256Proxy;
 
 /// Trait for types that can sign messages.
 #[async_trait]
@@ -19,11 +19,13 @@ pub trait Sign: std::fmt::Display {
         message: S,
     ) -> Result<Signature, Self::Error>;
 
+    /*
     /// Signs a prehashed message.
     async fn sign_digest(
         &self,
         digest: Sha256Proxy,
     ) -> Result<Signature, Self::Error>;
+    */
 
     /// Compute the address for the public
     /// key associated with this signer.

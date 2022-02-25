@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use k256::{
     ecdsa::{
         recoverable,
-        signature::{DigestSigner, Signer, Verifier},
+        signature::{Signer, Verifier},
         SigningKey, VerifyingKey,
     },
     elliptic_curve::sec1::ToEncodedPoint,
@@ -13,7 +13,7 @@ use rand_core::{CryptoRng, RngCore};
 use std::fmt;
 use thiserror::Error;
 
-use crate::{hash::Sha256Proxy, traits::Sign};
+use crate::traits::Sign;
 use ethereum_types::{Address, U256};
 use web3_hash_utils::keccak256;
 use web3_signature::Signature;
@@ -76,6 +76,7 @@ impl Sign for SingleParty {
         Ok(signature)
     }
 
+    /*
     /// Signs a prehashed message.
     async fn sign_digest(
         &self,
@@ -94,6 +95,7 @@ impl Sign for SingleParty {
 
         Ok(signature)
     }
+    */
 
     fn verify<S: Send + Sync + AsRef<[u8]>>(
         &self,
