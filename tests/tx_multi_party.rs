@@ -2,18 +2,16 @@ use anyhow::Result;
 
 use ethers_providers::Middleware;
 
-use web3_hash_utils::{keccak256, hash_message};
+use web3_hash_utils::{hash_message, keccak256};
 use web3_signature::Signature;
 use web3_signers::{coins_bip39::English, MnemonicBuilder};
 use web3_transaction::{
-    types::{Address, U256},
     eip1559::Eip1559TransactionRequest,
+    types::{Address, U256},
     TransactionRequest, TypedTransaction,
 };
 
-use multi_party_ecdsa::protocols::multi_party_ecdsa::gg_2020::{
-    party_i::{SignatureRecid},
-};
+use multi_party_ecdsa::protocols::multi_party_ecdsa::gg_2020::party_i::SignatureRecid;
 
 mod helpers;
 use helpers::*;

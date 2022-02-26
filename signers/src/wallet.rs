@@ -159,7 +159,10 @@ impl<S: Sign> Wallet<S> {
         &self,
         data: D,
         eip155: bool,
-    ) -> Result<Signature, WalletError> where D: AsRef<[u8]> {
+    ) -> Result<Signature, WalletError>
+    where
+        D: AsRef<[u8]>,
+    {
         let signature = if eip155 {
             self.signer
                 .sign(data.as_ref())
