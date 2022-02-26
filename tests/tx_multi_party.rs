@@ -2,11 +2,16 @@ use anyhow::Result;
 
 use ethers_providers::Middleware;
 
+use web3_hash_utils::{keccak256, hash_message};
 use web3_signature::Signature;
 use web3_signers::{coins_bip39::English, MnemonicBuilder};
 use web3_transaction::{
     types::{Address, U256},
     TransactionRequest, TypedTransaction,
+};
+
+use multi_party_ecdsa::protocols::multi_party_ecdsa::gg_2020::{
+    party_i::{SignatureRecid},
 };
 
 mod helpers;
@@ -71,20 +76,38 @@ async fn tx_multi_party_legacy() -> Result<()> {
     let mut signatures = mpc_signature(&sighash, ks1, ks2)?;
     let signature = signatures.remove(0);
 
+    recover_secp256k1(sighash.as_ref(), &signature)?;
+
     let r = signature.r.to_bytes().as_ref().to_vec();
     let s = signature.s.to_bytes().as_ref().to_vec();
     let v = signature.recid as u64;
+
+    println!("M {}", hex::encode(&sighash));
+    println!("R {}", hex::encode(&r));
+    println!("S {}", hex::encode(&s));
+    println!("V {}", signature.recid);
 
     let signature = Signature {
         r: U256::from_big_endian(&r),
         s: U256::from_big_endian(&s),
         v,
     }
-    .into_eip155(1337);
+    //.into_eip155(1337);
+    .into_electrum();
 
-    println!("Got MPC signature {:#?}", signature);
+    println!("AFTER CONVERSION");
+    let s_r: [u8; 32] = signature.r.into();
+    let s_s: [u8; 32] = signature.s.into();
+    println!("R {}", hex::encode(s_r));
+    println!("S {}", hex::encode(s_s));
+    println!("V {}", signature.v);
+
+    //println!("Got MPC signature {:#?}", signature);
 
     let bytes = tx.rlp_signed(&signature);
+
+    println!("tx: 0x{}", hex::encode(&bytes.0));
+
     let tx_receipt = provider.send_raw_transaction(into_bytes(bytes)).await?;
     dbg!(tx_receipt);
 
@@ -94,6 +117,37 @@ async fn tx_multi_party_legacy() -> Result<()> {
     //println!("Got balance {:#?}", balance_before);
 
     //println!("Key shares {:#?}", key_shares);
+
+    Ok(())
+}
+
+fn recover_secp256k1<B>(msg: B, signature: &SignatureRecid) -> Result<()> where B: AsRef<[u8]> {
+    /// Get a secp256k1 Signature
+    let mut compact: Vec<u8> = Vec::new();
+    let bytes_r = signature.r.to_bytes().to_vec();
+    compact.extend(vec![0u8; 32 - bytes_r.len()]);
+    compact.extend(bytes_r.iter());
+
+    let bytes_s = signature.s.to_bytes().to_vec();
+    compact.extend(vec![0u8; 32 - bytes_s.len()]);
+    compact.extend(bytes_s.iter());
+
+    let mut secp_sig = secp256k1::Signature::parse_slice(
+        compact.as_slice()).unwrap();
+
+    println!("before normalize s: {:#?}", secp_sig.s);
+    secp_sig.normalize_s();
+    println!("after normalize s: {:#?}", secp_sig.s);
+
+    let rec_id = secp256k1::RecoveryId::parse(signature.recid)?;
+    let msg = secp256k1::Message::parse_slice(msg.as_ref())?;
+    let pk = secp256k1::recover(&msg, &secp_sig, &rec_id)?;
+
+    let pk_bytes = pk.serialize();
+    let hash = keccak256(&pk_bytes[1..]);
+    let address = &hash[12..];
+
+    println!("recovered: 0x{}", hex::encode(address));
 
     Ok(())
 }
