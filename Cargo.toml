@@ -32,7 +32,8 @@ curv-kzen = {version = "0.9", features = ["num-bigint"], default-features = fals
 round-based = "0.1"
 reqwest = "0.11.9"
 url = "2.2.2"
-libsecp256k1 = "0.3.2"
+rlp = { version = "0.5.0", default-features = false }
+#libsecp256k1 = "0.3.2"
 
 # So we can use Http::new_with_client() to fix
 # the reqwest idle problem, see: https://github.com/hyperium/hyper/issues/2136

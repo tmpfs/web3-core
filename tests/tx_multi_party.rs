@@ -7,6 +7,7 @@ use web3_signature::Signature;
 use web3_signers::{coins_bip39::English, MnemonicBuilder};
 use web3_transaction::{
     types::{Address, U256},
+    eip1559::Eip1559TransactionRequest,
     TransactionRequest, TypedTransaction,
 };
 
@@ -46,6 +47,8 @@ async fn tx_multi_party_legacy() -> Result<()> {
         .get_balance(into_provider_address(&mpc_addr), None)
         .await?;
 
+    println!("Got balance for MPC addr: {}", balance_before_mpc);
+
     // Ensure the MPC address has some funds to spend
     fund_mpc_account(mpc_addr).await?;
 
@@ -59,12 +62,17 @@ async fn tx_multi_party_legacy() -> Result<()> {
     );
 
     let value = 1_000u64;
-    let tx: TypedTransaction = TransactionRequest::new()
+    // NOTE: must use an Eip1559 transaction
+    // NOTE: otherwise ganache/ethers fails to
+    // NOTE: parse the correct chain id!
+    let tx: TypedTransaction = Eip1559TransactionRequest::new()
         .from(mpc_addr.clone())
         .to(to)
         .value(value)
+        .max_fee_per_gas(200_000u64)
+        .max_priority_fee_per_gas(22_000_000u64)
         .gas(21_000u64)
-        .gas_price(22_000_000_000u64)
+        //.gas_price(22_000_000_000u64)
         .chain_id(1337u64)
         .nonce(nonce)
         .into();
@@ -76,7 +84,7 @@ async fn tx_multi_party_legacy() -> Result<()> {
     let mut signatures = mpc_signature(&sighash, ks1, ks2)?;
     let signature = signatures.remove(0);
 
-    recover_secp256k1(sighash.as_ref(), &signature)?;
+    //recover_secp256k1(sighash.as_ref(), &signature)?;
 
     let r = signature.r.to_bytes().as_ref().to_vec();
     let s = signature.s.to_bytes().as_ref().to_vec();
@@ -92,21 +100,34 @@ async fn tx_multi_party_legacy() -> Result<()> {
         s: U256::from_big_endian(&s),
         v,
     }
-    //.into_eip155(1337);
-    .into_electrum();
+    .into_eip155(1337);
+    //.into_electrum();
 
+    /*
     println!("AFTER CONVERSION");
     let s_r: [u8; 32] = signature.r.into();
     let s_s: [u8; 32] = signature.s.into();
     println!("R {}", hex::encode(s_r));
     println!("S {}", hex::encode(s_s));
     println!("V {}", signature.v);
+    */
 
     //println!("Got MPC signature {:#?}", signature);
 
     let bytes = tx.rlp_signed(&signature);
 
     println!("tx: 0x{}", hex::encode(&bytes.0));
+
+    /*
+    let expected_signed_rlp =
+        rlp::Rlp::new(&bytes.0);
+    let (decoded_tx, decoded_sig) =
+        TransactionRequest::decode_signed_rlp(&expected_signed_rlp)
+            .unwrap();
+
+    println!("Decoded tx {:#?}", decoded_tx);
+    println!("Decoded sig {:#?}", decoded_sig);
+    */
 
     let tx_receipt = provider.send_raw_transaction(into_bytes(bytes)).await?;
     dbg!(tx_receipt);
@@ -121,6 +142,7 @@ async fn tx_multi_party_legacy() -> Result<()> {
     Ok(())
 }
 
+/*
 fn recover_secp256k1<B>(msg: B, signature: &SignatureRecid) -> Result<()> where B: AsRef<[u8]> {
     /// Get a secp256k1 Signature
     let mut compact: Vec<u8> = Vec::new();
@@ -151,6 +173,7 @@ fn recover_secp256k1<B>(msg: B, signature: &SignatureRecid) -> Result<()> where 
 
     Ok(())
 }
+*/
 
 async fn fund_mpc_account(mpc_addr: Address) -> Result<()> {
     let provider = provider(ENDPOINT)?;
@@ -171,7 +194,7 @@ async fn fund_mpc_account(mpc_addr: Address) -> Result<()> {
             .await?,
     );
 
-    let value = 1_000_000u64;
+    let value = 1_000u64;
     let tx: TypedTransaction = TransactionRequest::new()
         .from(from.address().clone())
         .to(mpc_addr)

@@ -58,6 +58,8 @@ async fn tx_single_party_legacy() -> Result<()> {
     let bytes = tx.rlp_signed(&signature);
     dbg!(hex::encode(&bytes.0));
 
+    //println!("tx: 0x{}", hex::encode(&bytes.0));
+
     let tx_receipt = provider.send_raw_transaction(into_bytes(bytes)).await?;
     dbg!(tx_receipt);
 
