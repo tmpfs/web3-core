@@ -29,6 +29,8 @@ jobs:
         run: make test-server &
       - name: Wait a while for test server
         run: sleep 2
+      - name: Fund the MPC account
+        run: make fund-mpc-account
       - name: Run cargo test
         run: cargo test --all
       - name: Run cargo doc

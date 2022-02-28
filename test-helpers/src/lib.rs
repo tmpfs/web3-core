@@ -4,11 +4,18 @@ use anyhow::Result;
 use std::path::{Path, PathBuf};
 use url::Url;
 
-use ethers_providers::{Http, Provider};
-use std::convert::TryFrom;
+use ethers_providers::{Http, Middleware, Provider};
 
 use web3_hash_utils::keccak256;
-use web3_transaction::types::{Address, Bytes, U256};
+use web3_signers::{
+    coins_bip39::English, single_party::SingleParty, MnemonicBuilder, Wallet,
+};
+use web3_transaction::{
+    //eip1559::Eip1559TransactionRequest,
+    types::{Address, Bytes, U256},
+    TransactionRequest,
+    TypedTransaction,
+};
 
 use curv::{
     arithmetic::Converter, elliptic::curves::secp256_k1::Secp256k1, BigInt,
@@ -21,6 +28,11 @@ use multi_party_ecdsa::protocols::multi_party_ecdsa::gg_2020::{
     },
 };
 use round_based::StateMachine;
+
+pub const ENDPOINT: &str = "http://localhost:8545";
+
+const PARTIES: u16 = 3;
+const MNEMONIC_PHRASE: &str = include_str!("mnemonic.txt");
 
 pub fn provider(src: &str) -> Result<Provider<Http>> {
     let client = reqwest::Client::builder()
@@ -54,6 +66,16 @@ pub fn into_u256(value: ethers_core::types::U256) -> U256 {
     U256::from_big_endian(&nonce_bytes)
 }
 
+pub fn load_default_key_shares() -> Result<(Address, Vec<LocalKey<Secp256k1>>)>
+{
+    let key_shares = load_key_shares("test-helpers/mpc-keys", PARTIES)?;
+    let ks1 = key_shares.get(0).unwrap();
+    let pk1 = ks1.public_key();
+    let pk1_bytes = pk1.to_bytes(false).to_vec();
+    let mpc_addr = mpc_address(pk1_bytes);
+    Ok((mpc_addr, key_shares))
+}
+
 pub fn load_key_shares<P: AsRef<Path>>(
     dir: P,
     parties: u16,
@@ -80,6 +102,7 @@ pub fn mpc_address(bytes: Vec<u8>) -> Address {
     Address::from_slice(final_bytes)
 }
 
+/// Generate a signature using the key shares for test MPC.
 pub fn mpc_signature<B>(
     message: B,
     ks1: &LocalKey<Secp256k1>,
@@ -293,4 +316,45 @@ where
     debug_assert!(verify(&signature2, &s2_pk, &data).is_ok());
 
     Ok(vec![signature1, signature2])
+}
+
+pub fn primary_wallet() -> Result<Wallet<SingleParty>> {
+    // Now we need to ensure the MPC address has some funds
+    let wallet = MnemonicBuilder::<English>::default()
+        .phrase(MNEMONIC_PHRASE.trim().to_string())
+        .build()?
+        .with_chain_id(1337u64);
+    Ok(wallet)
+}
+
+pub async fn fund_account<'a>(to: Address, value: Option<u64>) -> Result<()> {
+    let provider = provider(ENDPOINT)?;
+
+    let from = primary_wallet()?;
+    let addr = into_provider_address(from.address());
+
+    let nonce = into_u256(
+        provider
+            .get_transaction_count(
+                addr.clone(),
+                Some(ethers_core::types::BlockNumber::Latest.into()),
+            )
+            .await?,
+    );
+
+    let value = value.unwrap_or(1_000_000_000_000_000_000u64);
+    let tx: TypedTransaction = TransactionRequest::new()
+        .from(from.address().clone())
+        .to(to)
+        .value(value)
+        .gas(21_000u64)
+        .gas_price(22_000_000_000u64)
+        .chain_id(1337u64)
+        .nonce(nonce)
+        .into();
+
+    let signature = from.sign_transaction(&tx).await?;
+    let bytes = tx.rlp_signed(&signature);
+    let _ = provider.send_raw_transaction(into_bytes(bytes)).await?;
+    Ok(())
 }

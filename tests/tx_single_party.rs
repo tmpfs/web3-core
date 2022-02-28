@@ -1,14 +1,8 @@
 use anyhow::Result;
 
 use ethers_providers::Middleware;
-
-use web3_signers::{coins_bip39::English, MnemonicBuilder};
+use web3_test_helpers::*;
 use web3_transaction::{TransactionRequest, TypedTransaction};
-
-mod helpers;
-use helpers::*;
-
-const MNEMONIC_PHRASE: &str = include_str!("mnemonic.txt");
 
 #[tokio::test]
 async fn tx_single_party_legacy() -> Result<()> {
@@ -16,11 +10,7 @@ async fn tx_single_party_legacy() -> Result<()> {
     let accounts = provider.get_accounts().await?;
     let to = into_address(accounts[1]);
 
-    let from = MnemonicBuilder::<English>::default()
-        .phrase(MNEMONIC_PHRASE.trim().to_string())
-        .build()?
-        .with_chain_id(1337u64);
-
+    let from = primary_wallet()?;
     let addr = into_provider_address(from.address());
 
     let balance_before = provider.get_balance(addr.clone(), None).await?;

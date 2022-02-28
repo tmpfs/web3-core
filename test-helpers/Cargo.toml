@@ -1,0 +1,41 @@
+[package]
+name = "web3-test-helpers"
+version = "0.1.0"
+edition = "2021"
+publish = false
+default-run = "generate-mpc-keys"
+
+[dependencies]
+anyhow = "1"
+tokio = { version = "1", features = ["rt", "macros"] }
+curv-kzen = {version = "0.9", features = ["num-bigint"], default-features = false}
+round-based = "0.1"
+serde_json = "1"
+web3-transaction = { version = "0.1", path = "../transaction" }
+web3-signers = { version = "0.1", path = "../signers" }
+web3-hash-utils = { version = "1", path = "../hash-utils" }
+reqwest = "0.11.9"
+url = "2.2.2"
+
+# So we can use Http::new_with_client() to fix
+# the reqwest idle problem, see: https://github.com/hyperium/hyper/issues/2136
+[dependencies.ethers-providers]
+git = "https://github.com/gakonst/ethers-rs.git"
+branch = "master"
+
+[dependencies.ethers-core]
+git = "https://github.com/gakonst/ethers-rs.git"
+branch = "master"
+
+[dependencies.multi-party-ecdsa]
+git = "https://github.com/ZenGo-X/multi-party-ecdsa"
+branch = "master"
+default-features = false
+
+[[bin]]
+name = "generate-mpc-keys"
+path = "src/bin/generate-mpc-keys.rs"
+
+[[bin]]
+name = "fund-mpc-account"
+path = "src/bin/fund-mpc-account.rs"
