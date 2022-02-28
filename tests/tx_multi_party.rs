@@ -3,16 +3,13 @@ use anyhow::Result;
 use ethers_providers::Middleware;
 use web3_signature::Signature;
 use web3_transaction::{
-    eip1559::Eip1559TransactionRequest, types::U256, TransactionRequest,
-    TypedTransaction,
+    eip1559::Eip1559TransactionRequest, types::U256, TypedTransaction,
 };
-
-use multi_party_ecdsa::protocols::multi_party_ecdsa::gg_2020::party_i::SignatureRecid;
 
 use web3_test_helpers::*;
 
 #[tokio::test]
-async fn tx_multi_party_legacy() -> Result<()> {
+async fn tx_multi_party_eip1559() -> Result<()> {
     let provider = provider(ENDPOINT)?;
     let accounts = provider.get_accounts().await?;
     let to = into_address(accounts[1]);
@@ -23,14 +20,10 @@ async fn tx_multi_party_legacy() -> Result<()> {
     let ks2 = key_shares.get(1).unwrap();
 
     let balance_before = provider
-        .get_balance(into_provider_address(&to), None)
-        .await?;
-
-    let balance_before_mpc = provider
         .get_balance(into_provider_address(&mpc_addr), None)
         .await?;
 
-    dbg!(&balance_before_mpc);
+    dbg!(&balance_before);
 
     let nonce = into_u256(
         provider
@@ -68,12 +61,10 @@ async fn tx_multi_party_legacy() -> Result<()> {
     let s = signature.s.to_bytes().as_ref().to_vec();
     let v = signature.recid as u64;
 
-    /*
-    println!("M {}", hex::encode(&sighash));
-    println!("R {}", hex::encode(&r));
-    println!("S {}", hex::encode(&s));
-    println!("V {}", signature.recid);
-    */
+    dbg!(format!("M {}", hex::encode(&sighash)));
+    dbg!(format!("R {}", hex::encode(&r)));
+    dbg!(format!("S {}", hex::encode(&s)));
+    dbg!(format!("V {}", signature.recid));
 
     let signature = Signature {
         r: U256::from_big_endian(&r),
