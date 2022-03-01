@@ -2,7 +2,7 @@
 //! Ethereum blockchain designed for Webassembly interoperability.
 #![deny(missing_docs)]
 
-mod hash;
+//mod hash;
 mod mnemonic;
 mod phrase;
 pub mod single_party;

@@ -14,6 +14,12 @@ To run the tests first start `ganache` using a specific mnemonic:
 make test-server
 ```
 
+Then ensure the test MPC account has some funds:
+
+```
+make fund-mpc-account
+```
+
 Then you can run the test suite:
 
 ```
