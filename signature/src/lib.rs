@@ -128,9 +128,8 @@ impl Signature {
         }
     }
 
-    /// Get the bytes for the r and s values.
-    pub fn to_bytes(&self) -> [u8; 64] {
-        //let mut out = Vec::with_capacity(64);
+    /// Get the bytes for the r, s and v values.
+    pub fn to_bytes(&self) -> [u8; 65] {
         let mut out = [0u8; 64];
         let mut r: [u8; 32] = [0u8; 32];
         let mut s: [u8; 32] = [0u8; 32];
@@ -139,27 +138,14 @@ impl Signature {
         let (left, right) = out.split_at_mut(32);
         left.copy_from_slice(&r);
         right.copy_from_slice(&s);
-        out
-    }
-}
 
-/*
-impl From<&Signature> for [u8; 65] {
-    fn from(src: &Signature) -> [u8; 65] {
-        let mut sig = [0u8; 65];
-        let mut r_bytes = [0u8; 32];
-        let mut s_bytes = [0u8; 32];
-        src.r.to_big_endian(&mut r_bytes);
-        src.s.to_big_endian(&mut s_bytes);
-        sig[..32].copy_from_slice(&r_bytes);
-        sig[32..64].copy_from_slice(&s_bytes);
-        // TODO: What if we try to serialize a signature where
-        // the `v` is not normalized?
-        sig[64] = src.v as u8;
-        sig
+        let mut result = [0u8; 65];
+        let (left, right) = result.split_at_mut(64);
+        left.copy_from_slice(&out);
+        right[0] = self.v as u8;
+        result
     }
 }
-*/
 
 impl<'a> TryFrom<&'a [u8]> for Signature {
     type Error = SignatureError;
@@ -189,6 +175,20 @@ impl FromStr for Signature {
         Signature::try_from(&bytes[..])
     }
 }
+
+impl From<[u8; 65]> for Signature {
+    fn from(value: [u8; 65]) -> Self {
+        let r = &value[0..32];
+        let s = &value[32..64];
+        let v = &value[64];
+        Self {
+            r: U256::from_big_endian(r),
+            s: U256::from_big_endian(s),
+            v: *v as u64,
+        }
+    }
+}
+
 
 #[cfg(feature = "single-party")]
 impl From<k256::ecdsa::recoverable::Signature> for Signature {
