@@ -211,6 +211,15 @@ impl From<k256::ecdsa::recoverable::Signature> for Signature {
     }
 }
 
+#[cfg(feature = "single-party")]
+impl TryFrom<Signature> for k256::ecdsa::recoverable::Signature {
+    type Error = SignatureError;
+    fn try_from(sig: Signature) -> Result<Self, Self::Error> {
+        let bytes = sig.to_bytes();
+        Ok(Self::from_bytes(&bytes)?)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
