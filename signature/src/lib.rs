@@ -129,7 +129,13 @@ impl Signature {
     }
 
     /// Get the bytes for the r, s and v values.
+    ///
+    /// Panics if this signature is not normalized.
     pub fn to_bytes(&self) -> [u8; 65] {
+        if !self.is_normalized() {
+            panic!("signature must be normalized to convert to byte array");
+        }
+
         let mut out = [0u8; 64];
         let mut r: [u8; 32] = [0u8; 32];
         let mut s: [u8; 32] = [0u8; 32];
