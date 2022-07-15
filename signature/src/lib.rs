@@ -32,7 +32,7 @@ pub enum SignatureError {
 ///
 /// The recovery identifier may be normalized, in Electrum notation
 /// or have EIP155 chain replay protection applied.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Copy)]
 pub struct Signature {
     /// R value
     pub r: U256,
