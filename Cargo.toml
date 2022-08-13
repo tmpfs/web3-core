@@ -39,14 +39,20 @@ url = "2.2.2"
 # So we can use Http::new_with_client() to fix
 # the reqwest idle problem, see: https://github.com/hyperium/hyper/issues/2136
 [dev-dependencies.ethers-providers]
-git = "https://github.com/gakonst/ethers-rs.git"
-branch = "master"
+version = "0.17"
+#git = "https://github.com/gakonst/ethers-rs.git"
+#branch = "master"
 
 [dev-dependencies.ethers-core]
-git = "https://github.com/gakonst/ethers-rs.git"
-branch = "master"
+version = "0.17"
+#git = "https://github.com/gakonst/ethers-rs.git"
+#branch = "master"
 
 [dev-dependencies.multi-party-ecdsa]
 git = "https://github.com/ZenGo-X/multi-party-ecdsa"
 branch = "master"
 default-features = false
+
+[patch.crates-io]
+curv-kzen = { git = 'https://github.com/Be-P/curv', branch = "bump-p256-to-0.11" }
+
