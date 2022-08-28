@@ -1,6 +1,7 @@
 //! Ethereum style address.
 use crate::{Error, Result};
 use k256::{
+    ecdsa::VerifyingKey,
     elliptic_curve::{sec1::ToEncodedPoint, DecompressPoint, ScalarCore},
     AffinePoint, EncodedPoint, FieldBytes, Scalar, Secp256k1,
 };
@@ -78,6 +79,30 @@ impl<'a> From<&'a [u8; 64]> for Address {
         let digest = Keccak256::digest(bytes);
         let final_bytes = &digest[12..];
         Self(final_bytes.try_into().unwrap())
+    }
+}
+
+impl From<[u8; 64]> for Address {
+    fn from(bytes: [u8; 64]) -> Self {
+        (&bytes).into()
+    }
+}
+
+impl<'a> From<&'a VerifyingKey> for Address {
+    fn from(key: &'a VerifyingKey) -> Self {
+        let bytes: [u8; 33] = key.to_bytes().as_slice().try_into()
+            .expect("invalid bytes from verifying key");
+        let decompressed = decompress(bytes)?;
+        let x: [u8; 32] = *decompressed.x().unwrap().as_ref();
+        let y: [u8; 32] = *decompressed.y().unwrap().as_ref();
+        let bytes: [u8; 64] = [x, y].concat().as_slice().try_into()?;
+        (&bytes).into()
+    }
+}
+
+impl From<VerifyingKey> for Address {
+    fn from(key: VerifyingKey) -> Self {
+        (&key).into()
     }
 }
 
