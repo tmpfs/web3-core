@@ -2,7 +2,7 @@
 //!
 //! More types will be added in the future.
 #![deny(missing_docs)]
-#![feature(doc_auto_cfg)]
+#![cfg_attr(all(doc, CHANNEL_NIGHTLY), feature(doc_auto_cfg))]
 mod error;
 
 #[cfg(feature = "ethereum")]
