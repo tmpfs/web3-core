@@ -18,3 +18,4 @@ ethereum = ["k256", "subtle", "sha3", "hex"]
 
 [dev-dependencies]
 anyhow = "1"
+rand = "0.8"

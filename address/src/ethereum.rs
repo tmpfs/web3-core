@@ -92,10 +92,11 @@ impl<'a> From<&'a VerifyingKey> for Address {
     fn from(key: &'a VerifyingKey) -> Self {
         let bytes: [u8; 33] = key.to_bytes().as_slice().try_into()
             .expect("invalid bytes from verifying key");
-        let decompressed = decompress(bytes)?;
+        let decompressed = decompress(&bytes)
+            .expect("failed to decompress public key");
         let x: [u8; 32] = *decompressed.x().unwrap().as_ref();
         let y: [u8; 32] = *decompressed.y().unwrap().as_ref();
-        let bytes: [u8; 64] = [x, y].concat().as_slice().try_into()?;
+        let bytes: [u8; 64] = [x, y].concat().as_slice().try_into().unwrap();
         (&bytes).into()
     }
 }
@@ -163,6 +164,7 @@ fn address(bytes: &[u8; 64]) -> Result<String> {
 mod tests {
     use super::*;
     use anyhow::Result;
+    use k256::ecdsa::SigningKey;
 
     const COMPRESSED_PUBLIC_KEY: &str =
         "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
@@ -192,6 +194,14 @@ mod tests {
         bytes.copy_from_slice(&compressed_bytes[..]);
         let address = address_compressed(&bytes)?;
         assert_eq!(COMPRESSED_ADDRESS, address);
+        Ok(())
+    }
+
+    #[test]
+    fn verifying_key() -> Result<()> {
+        let key = SigningKey::random(&mut rand::thread_rng());
+        let public_key = key.verifying_key();
+        let address: Address = public_key.into();
         Ok(())
     }
 }
