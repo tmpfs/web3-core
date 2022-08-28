@@ -113,7 +113,7 @@ fn decompress(compressed_bytes: &[u8; 33]) -> Result<EncodedPoint> {
 }
 
 /// Compute the public address for a compressed public key.
-pub fn address_compressed(compressed_bytes: &[u8; 33]) -> Result<String> {
+fn address_compressed(compressed_bytes: &[u8; 33]) -> Result<String> {
     let decompressed = decompress(compressed_bytes)?;
     let x: [u8; 32] = *decompressed.x().unwrap().as_ref();
     let y: [u8; 32] = *decompressed.y().unwrap().as_ref();
@@ -122,13 +122,13 @@ pub fn address_compressed(compressed_bytes: &[u8; 33]) -> Result<String> {
 }
 
 /// Compute the public address for a decompressed public key.
-pub fn address_decompressed(bytes: &[u8; 65]) -> Result<String> {
+fn address_decompressed(bytes: &[u8; 65]) -> Result<String> {
     let bytes: [u8; 64] = bytes[1..].try_into()?;
     address(&bytes)
 }
 
 /// Compute the public address for the bytes representing the x / y coordinate pair.
-pub fn address(bytes: &[u8; 64]) -> Result<String> {
+fn address(bytes: &[u8; 64]) -> Result<String> {
     let digest = Keccak256::digest(bytes);
     let final_bytes = &digest[12..];
     Ok(format!("0x{}", hex::encode(&final_bytes)))

@@ -7,13 +7,14 @@ description = "Address type for web3 public keys"
 [dependencies]
 thiserror = "1"
 serde = { version = "1", features = ["derive"] }
-k256 = { version = "0.11", features = ["ecdsa", "sha256", "keccak256"] }
-subtle = "2.4"
-sha3 = "0.9"
-hex = { version = "0.4", features = ["serde"] }
+
+k256 = { version = "0.11", features = ["ecdsa", "sha256", "keccak256"], optional = true }
+subtle = { version = "2.4", optional = true }
+sha3 = { version = "0.9", optional = true }
+hex = { version = "0.4", features = ["serde"], optional = true }
 
 [features]
-ethereum = []
+ethereum = ["k256", "subtle", "sha3", "hex"]
 
 [dev-dependencies]
 anyhow = "1"

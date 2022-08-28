@@ -1,9 +1,8 @@
 //! Address types to represent public keys on various blockchains.
 //!
-//! Use the `ethereum` feature flag for ethereum style addresses. 
-//!
 //! More types will be added in the future.
 #![deny(missing_docs)]
+#![feature(doc_auto_cfg)]
 mod error;
 
 #[cfg(feature = "ethereum")]
