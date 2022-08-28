@@ -3,6 +3,7 @@ name = "web3-address"
 version = "0.1.0"
 edition = "2021"
 description = "Address type for web3 public keys"
+license = "MIT or APACHE-2.0"
 
 [dependencies]
 thiserror = "1"
