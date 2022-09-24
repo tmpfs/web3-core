@@ -1,6 +1,6 @@
 [package]
 name = "web3-keystore"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Muji <muji@tmpfs.org>", "Rohit Narurkar <rohit.narurkar@protonmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"

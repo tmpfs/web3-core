@@ -98,7 +98,7 @@ where
     S: AsRef<[u8]>,
 {
     let pk: [u8; DEFAULT_KEY_SIZE] = rng.gen();
-    Ok((encrypt(rng, &pk, password, None)?, pk.to_vec()))
+    Ok((encrypt(rng, &pk, password, None, None)?, pk.to_vec()))
 }
 
 /// Decrypts an encrypted keystore using the provided `password`.
@@ -197,7 +197,7 @@ where
 /// let password = "super-secret-password";
 /// let address = Some(String::from("0x0"));
 /// let keystore = encrypt(
-///     &mut rng, &secret, password, address).unwrap();
+///     &mut rng, &secret, password, address, None).unwrap();
 /// let private_key = decrypt(&keystore, password).unwrap();
 /// assert_eq!(secret.to_vec(), private_key);
 /// ```
@@ -206,6 +206,7 @@ pub fn encrypt<R, B, S>(
     pk: B,
     password: S,
     address: Option<String>,
+    label: Option<String>,
 ) -> Result<KeyStore, KeyStoreError>
 where
     R: Rng + CryptoRng,
@@ -246,6 +247,7 @@ where
     let keystore = KeyStore {
         id,
         address,
+        label,
         version: 3,
         crypto: CryptoData {
             cipher: String::from(DEFAULT_CIPHER),

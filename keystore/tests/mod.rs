@@ -48,7 +48,7 @@ fn test_encrypt_decrypt() -> Result<()> {
     )
     .unwrap();
     let mut rng = rand::thread_rng();
-    let keystore = encrypt(&mut rng, &secret, "newpassword", None)?;
+    let keystore = encrypt(&mut rng, &secret, "newpassword", None, None)?;
 
     assert_eq!(decrypt(&keystore, "newpassword")?, secret);
     assert!(decrypt(&keystore, "notanewpassword").is_err());

@@ -11,6 +11,8 @@ pub struct KeyStore {
     pub id: Uuid,
     /// Optional public address for the keystore (non-standard).
     pub address: Option<String>,
+    /// Optional label for the keystore (non-standard).
+    pub label: Option<String>,
     /// Crypto part of the keystore.
     pub(crate) crypto: CryptoData,
 }
