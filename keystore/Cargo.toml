@@ -1,6 +1,6 @@
 [package]
 name = "web3-keystore"
-version = "0.5.0"
+version = "0.5.1"
 authors = ["Muji <muji@tmpfs.org>", "Rohit Narurkar <rohit.narurkar@protonmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
@@ -17,9 +17,9 @@ ctr = "0.9"
 digest = "0.10.3"
 hex = { version = "0.4.3", features = ["serde"] }
 hmac = "0.12.0"
-pbkdf2 = "0.10.0"
+pbkdf2 = "0.11.0"
 rand = "0.8.5"
-scrypt = "0.9"
+scrypt = "0.10"
 serde = { version = "1.0", features = ["derive"] }
 sha2 = "0.10.1"
 sha3 = "0.10.0"
