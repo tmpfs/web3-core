@@ -69,7 +69,7 @@ impl From<Address> for [u8; 20] {
 
 impl TryFrom<String> for Address {
     type Error = Error;
-    fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
+    fn try_from(value: String) -> Result<Self> {
         <Address as FromStr>::from_str(&value)
     }
 }
@@ -88,18 +88,23 @@ impl From<[u8; 64]> for Address {
     }
 }
 
-impl<'a> From<&'a VerifyingKey> for Address {
-    fn from(key: &'a VerifyingKey) -> Self {
-        let bytes: [u8; 64] = key.
-            to_encoded_point(false).as_bytes().try_into()
-            .expect("invalid bytes from verifying key");
-        bytes.into()
+impl<'a> TryFrom<&'a VerifyingKey> for Address {
+    type Error = Error;
+
+    fn try_from(key: &'a VerifyingKey) -> Result<Self> {
+        let point = key.to_encoded_point(true);
+        let bytes: [u8; 33] = point.as_bytes().try_into()?;
+        (&bytes).try_into()
+        //let bytes: [u8; 33] = key.
+            //to_encoded_point(true).as_bytes().try_into()?;
+        //bytes.into()
     }
 }
 
-impl From<VerifyingKey> for Address {
-    fn from(key: VerifyingKey) -> Self {
-        (&key).into()
+impl TryFrom<VerifyingKey> for Address {
+    type Error = Error;
+    fn try_from(key: VerifyingKey) -> Result<Self> {
+        (&key).try_into()
     }
 }
 
