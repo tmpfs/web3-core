@@ -18,6 +18,11 @@ pub enum SignatureError {
     /// Invalid length, secp256k1 signatures are 65 bytes
     #[error("invalid signature length, got {0}, expected 65")]
     InvalidLength(usize),
+
+    /// Expected a recovery identifier.
+    #[error("recovery identifier is expected")]
+    RecoveryId,
+
     /// When parsing a signature from string to hex
     #[error(transparent)]
     DecodingError(#[from] hex::FromHexError),
@@ -32,7 +37,9 @@ pub enum SignatureError {
 ///
 /// The recovery identifier may be normalized, in Electrum notation
 /// or have EIP155 chain replay protection applied.
-#[derive(Default, Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(
+    Default, Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Copy,
+)]
 pub struct Signature {
     /// R value
     pub r: U256,
@@ -203,20 +210,35 @@ impl From<[u8; 65]> for Signature {
     }
 }
 
-
 #[cfg(feature = "single-party")]
-impl From<(k256::ecdsa::Signature, Option<RecoveryId>)> for Signature {
-    fn from(sig: (k256::ecdsa::Signature, Option<RecoveryId>)) -> Self {
+impl TryFrom<(k256::ecdsa::Signature, Option<RecoveryId>)> for Signature {
+    type Error = SignatureError;
+
+    fn try_from(
+        sig: (k256::ecdsa::Signature, Option<RecoveryId>),
+    ) -> Result<Self, Self::Error> {
         let r_bytes: FieldBytes = sig.0.r().into();
         let s_bytes: FieldBytes = sig.0.s().into();
-        let v: u8 = if let Some(v) = sig.1 {
-            v.into()
-        } else { 0 };
-        Self {
+        let v: u8 = sig.1.ok_or(SignatureError::RecoveryId)?.into();
+        Ok(Self {
             r: U256::from_big_endian(r_bytes.as_slice()),
             s: U256::from_big_endian(s_bytes.as_slice()),
             v: v as u64,
-        }
+        })
+    }
+}
+
+#[cfg(feature = "single-party")]
+impl TryFrom<Signature> for (k256::ecdsa::Signature, RecoveryId) {
+    type Error = SignatureError;
+    fn try_from(value: Signature) -> Result<Self, Self::Error> {
+        let mut r: [u8; 32] = [0u8; 32];
+        let mut s: [u8; 32] = [0u8; 32];
+        value.r.to_big_endian(&mut r);
+        value.s.to_big_endian(&mut s);
+        let signature = k256::ecdsa::Signature::from_scalars(r, s)?;
+        let recid = RecoveryId::try_from(value.v as u8)?;
+        Ok((signature, recid))
     }
 }
 
