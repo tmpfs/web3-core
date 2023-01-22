@@ -10,7 +10,7 @@ use std::str::FromStr;
 use thiserror::Error;
 
 #[cfg(feature = "single-party")]
-use k256::{ecdsa::signature::Signature as EcdsaSignature, FieldBytes};
+use k256::{ecdsa::RecoveryId, FieldBytes};
 
 /// Errors thrown converting to and from signatures.
 #[derive(Debug, Error)]
@@ -205,25 +205,16 @@ impl From<[u8; 65]> for Signature {
 
 
 #[cfg(feature = "single-party")]
-impl From<k256::ecdsa::recoverable::Signature> for Signature {
-    fn from(sig: k256::ecdsa::recoverable::Signature) -> Self {
-        let r_bytes: FieldBytes = sig.r().into();
-        let s_bytes: FieldBytes = sig.s().into();
-        let v: u8 = sig.recovery_id().into();
+impl From<(k256::ecdsa::Signature, RecoveryId)> for Signature {
+    fn from(sig: (k256::ecdsa::Signature, RecoveryId)) -> Self {
+        let r_bytes: FieldBytes = sig.0.r().into();
+        let s_bytes: FieldBytes = sig.0.s().into();
+        let v: u8 = sig.1.into();
         Self {
             r: U256::from_big_endian(r_bytes.as_slice()),
             s: U256::from_big_endian(s_bytes.as_slice()),
             v: v as u64,
         }
-    }
-}
-
-#[cfg(feature = "single-party")]
-impl TryFrom<Signature> for k256::ecdsa::recoverable::Signature {
-    type Error = SignatureError;
-    fn try_from(sig: Signature) -> Result<Self, Self::Error> {
-        let bytes = sig.to_bytes();
-        Ok(Self::from_bytes(&bytes)?)
     }
 }
 
