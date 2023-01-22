@@ -1,6 +1,6 @@
 [package]
 name = "web3-signature"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 authors = ["Muji <muji@tmpfs.org>"]
 license = "MIT OR Apache-2.0"

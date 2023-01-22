@@ -205,11 +205,13 @@ impl From<[u8; 65]> for Signature {
 
 
 #[cfg(feature = "single-party")]
-impl From<(k256::ecdsa::Signature, RecoveryId)> for Signature {
-    fn from(sig: (k256::ecdsa::Signature, RecoveryId)) -> Self {
+impl From<(k256::ecdsa::Signature, Option<RecoveryId>)> for Signature {
+    fn from(sig: (k256::ecdsa::Signature, Option<RecoveryId>)) -> Self {
         let r_bytes: FieldBytes = sig.0.r().into();
         let s_bytes: FieldBytes = sig.0.s().into();
-        let v: u8 = sig.1.into();
+        let v: u8 = if let Some(v) = sig.1 {
+            v.into()
+        } else { 0 };
         Self {
             r: U256::from_big_endian(r_bytes.as_slice()),
             s: U256::from_big_endian(s_bytes.as_slice()),
