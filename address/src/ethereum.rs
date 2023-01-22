@@ -90,14 +90,10 @@ impl From<[u8; 64]> for Address {
 
 impl<'a> From<&'a VerifyingKey> for Address {
     fn from(key: &'a VerifyingKey) -> Self {
-        let bytes: [u8; 33] = key.to_bytes().as_slice().try_into()
+        let bytes: [u8; 64] = key.
+            to_encoded_point(false).as_bytes().try_into()
             .expect("invalid bytes from verifying key");
-        let decompressed = decompress(&bytes)
-            .expect("failed to decompress public key");
-        let x: [u8; 32] = *decompressed.x().unwrap().as_ref();
-        let y: [u8; 32] = *decompressed.y().unwrap().as_ref();
-        let bytes: [u8; 64] = [x, y].concat().as_slice().try_into().unwrap();
-        (&bytes).into()
+        bytes.into()
     }
 }
 

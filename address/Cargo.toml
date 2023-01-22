@@ -1,6 +1,6 @@
 [package]
 name = "web3-address"
-version = "0.4.1"
+version = "0.5.0"
 edition = "2021"
 description = "Address type for web3 public keys"
 license = "MIT OR Apache-2.0"
@@ -8,7 +8,7 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 thiserror = "1"
 serde = { version = "1", features = ["derive"] }
-k256 = { version = "0.11.6", features = ["ecdsa", "sha256", "keccak256"], optional = true }
+k256 = { version = "0.12", features = ["ecdsa"], optional = true }
 subtle = { version = "2.4", optional = true }
 sha3 = { version = "0.10", optional = true }
 hex = { version = "0.4", features = ["serde"], optional = true }
