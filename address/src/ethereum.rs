@@ -2,9 +2,10 @@
 use crate::{Error, Result};
 use k256::{
     ecdsa::VerifyingKey,
-    elliptic_curve::{sec1::ToEncodedPoint, DecompressPoint, ScalarCore},
+    elliptic_curve::{sec1::ToEncodedPoint, point::DecompressPoint, scalar::ScalarPrimitive},
     AffinePoint, EncodedPoint, FieldBytes, Scalar, Secp256k1,
 };
+
 use serde::{Deserialize, Serialize};
 use sha3::{Digest, Keccak256};
 use std::{fmt, str::FromStr};
@@ -88,7 +89,7 @@ impl From<[u8; 64]> for Address {
     }
 }
 
-impl<'a> TryFrom<&'a VerifyingKey> for Address {
+impl<'a> TryFrom<&'a VerifyingKey<>> for Address {
     type Error = Error;
 
     fn try_from(key: &'a VerifyingKey) -> Result<Self> {
@@ -131,7 +132,7 @@ fn decompress(compressed_bytes: &[u8; 33]) -> Result<EncodedPoint> {
         Choice::from(0)
     };
     let x: &[u8; 32] = &compressed_bytes[1..].try_into()?;
-    let scalar_core = ScalarCore::<Secp256k1>::from_be_slice(x)?;
+    let scalar_core = ScalarPrimitive::<Secp256k1>::from_slice(x)?;
     let scalar = Scalar::from(scalar_core);
     let x_bytes = FieldBytes::from(scalar);
     let point = AffinePoint::decompress(&x_bytes, y_is_odd).unwrap();
@@ -197,12 +198,12 @@ mod tests {
         assert_eq!(COMPRESSED_ADDRESS, address);
         Ok(())
     }
-
+    
     #[test]
     fn verifying_key() -> Result<()> {
         let key = SigningKey::random(&mut rand::thread_rng());
         let public_key = key.verifying_key();
-        let address: Address = public_key.into();
+        let address: Address = public_key.try_into()?;
         Ok(())
     }
 }
