@@ -11,7 +11,7 @@ readme = "README.md"
 keywords = ["ethereum", "web3", "wallet", "sign", "ECDSA"]
 
 [dependencies]
-web3-signature = { version = "0.3", path = "../signature" }
+web3-signature = { version = "0.4", path = "../signature" }
 web3-transaction = { version = "0.1", path = "../transaction" }
 web3-hash-utils = { version = "1", path = "../hash-utils" }
 ethereum-types = "0.13"

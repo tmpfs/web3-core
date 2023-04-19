@@ -1,6 +1,6 @@
 [package]
 name = "web3-signature"
-version = "0.3.2"
+version = "0.4.0"
 edition = "2021"
 authors = ["Muji <muji@tmpfs.org>"]
 license = "MIT OR Apache-2.0"
@@ -14,7 +14,7 @@ ethereum-types = "0.13"
 serde = { version = "1", features = ["derive"] }
 thiserror = "1"
 hex = "0.4"
-k256 = { version = "0.12", optional = true, features = ["ecdsa"] }
+k256 = { version = "0.13.1", optional = true, features = ["ecdsa"] }
 
 [features]
 single-party = ["k256"]
